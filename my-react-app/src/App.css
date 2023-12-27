@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-header {
@@ -16,10 +16,50 @@
   color: #61dafb;
 }
 
+.main{
+  width: 70vw;
+  height: 90vh;
+  max-height: 90vh;
+  text-align: center;
+
+  /* Used to put imageDatabase on same row */
+  float: left;
+
+  margin-top: 8px;
+  margin-left: 8px;
+}
+
 .imageInput{
   /* placeholder */
-  max-width: 100vw;
-  max-height: 60vh;
+  width: 100%;
+  max-height: 60%;
+
+  /*border: 3px solid #282c34;
+  border-radius: 15px;*/
+}
+
+.imageDatabase{
+  display: inline block;
+  width: 20vw;
+  height: 80vh;
+  
+  /*border: 3px solid #282c34;*/
+  border-radius: 15px 0px 0px 15px;
+
+  margin-top: 8px;
+  margin-left: 75vw;
+
+  overflow-y: auto;
+
+  text-align: center;
+}
+
+#galleryDesc{
+
+}
+
+.galleryImg{
+  width: 100%;
 }
 
 input[type="file"] {
@@ -65,7 +105,6 @@ button {
 #uploadIMG{
   filter: invert(98%) sepia(1%) saturate(208%) hue-rotate(184deg) brightness(116%) contrast(100%);
   max-height: 3vh;
-  display: inline-block;
 }
 
 #id{
@@ -77,4 +116,26 @@ button {
   max-height: 59vh; /*60 - 1*/
   max-width: 100vw;
   margin-top: 1vh;
+}
+
+
+/* Custom scollbar */
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

@@ -1,5 +1,7 @@
 import logo from './logo.svg';
 import upload from './upload.svg';
+import img1 from './img1.jpg';
+import img2 from './img2.png'
 import './App.css';
 import React, { Component, useState } from "react";
 
@@ -74,6 +76,18 @@ function App() {
             }}
           />
         </label>
+      </div>
+      
+      <div className='imageDatabase'>
+        <h1 id='galleryDesc'>Last images processed</h1>
+        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' src={img2}></img>
+        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' src={img2}></img>
+        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' src={img2}></img>
+        <img className='galleryImg' src={img1}></img>
       </div>
     </div>
   );

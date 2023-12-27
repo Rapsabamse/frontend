@@ -4,16 +4,54 @@ import img1 from './img1.jpg';
 import img2 from './img2.png'
 import './App.css';
 import React, { Component, useState } from "react";
+import {decode as base64_decode, encode as base64_encode} from 'base-64';
+
+//TODO  Base64 -> Image
+//      Download image
+//      Connect webpage to webbserver
+//      Create connection to database
+//      Create connection to image processing module
 
 var image = null
-var url = null
+var url64 = null
 
-function reqThreshold() {
+//Creates a canvas, converts to dataUrl then converted to base64
+function toDataURL(src, outputformat) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      var canvas = document.createElement('CANVAS');
+      var ctx = canvas.getContext('2d');
+      var dataURL;
+      canvas.height = this.naturalHeight;
+      canvas.width = this.naturalWidth;
+      ctx.drawImage(this, 0, 0);
+      dataURL = canvas.toDataURL(outputformat);
+      resolve(dataURL);
+    };
+    img.src = src;
+    if (img.complete || img.complete === undefined) {
+      img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+      img.src = src;
+    }
+  });
+}
+
+async function reqThreshold() {
   console.log("thresholding")
-  console.log(image)
 
-  url = document.getElementById("image").src
-  console.log(url)
+  //Converts the uploaded image into base64
+  image = document.getElementById("image");
+  await toDataURL(image.src, 'image/JPEG')
+  .then(function(dataURL) {
+    // Handle the data URL here
+    url64 = dataURL
+  })
+
+  //to test that image is converted
+  console.log(url64)
+
   //get secure url from server
 
   //POST image directly to s3 bucket
@@ -24,10 +62,7 @@ function reqThreshold() {
 function reqBlur() {
   console.log("Blurring")
   console.log(image)
-
-  url = document.getElementById("image").src
-  console.log(url)
-
+  
   //get secure url from server
 
   //POST image directly to s3 bucket
@@ -43,7 +78,6 @@ function App() {
         <img src={logo} alt='Magic logo' id='logo'></img>
       </div>
       <div className='main'>
-
         {selectedImage && (
           <div>
             <div className='imageInput'>
@@ -54,15 +88,16 @@ function App() {
               />
             </div>
             <br />
-            <div className='procButtons'>
-              <button onClick={reqThreshold}>Threshold</button>
-              <button onClick={reqBlur}>Blur</button>
-            </div>
+            
           </div>
         )}
 
         <br />
         <br />
+        <div className='procButtons'>
+          <button onClick={reqThreshold}>Threshold</button>
+          <button onClick={reqBlur}>Blur</button>
+        </div>
         <label className="custom-file-upload">
           <p>Upload image</p>
           <img src={upload} id='uploadIMG'></img>
@@ -80,7 +115,7 @@ function App() {
       
       <div className='imageDatabase'>
         <h1 id='galleryDesc'>Last images processed</h1>
-        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' id='tmp' src={img1}></img>
         <img className='galleryImg' src={img2}></img>
         <img className='galleryImg' src={img1}></img>
         <img className='galleryImg' src={img2}></img>

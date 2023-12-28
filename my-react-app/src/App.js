@@ -77,11 +77,12 @@ async function reqThreshold() {
   })
 
   //Create a JSON object of the url
-  let splitUrl = url64.slice(url64.indexOf(";") + 1)
+  let splitUrl = url64.slice(url64.indexOf(",") + 1)
   const jsonStr = "{ " + '"body" : "' + splitUrl + '" }'
   const jsonObj = JSON.parse(jsonStr)
 
   //to test that image is converted
+  //console.log(url64)
   console.log(jsonObj)
 
 
@@ -123,7 +124,7 @@ async function reqBlur() {
 
 
   //Get response when image is done
-  
+
   //Placeholder to change image
   image.src = "https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"
 

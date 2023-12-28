@@ -8,9 +8,10 @@ import {decode as base64_decode, encode as base64_encode} from 'base-64';
 
 //TODO  Base64 -> Image
 //      Download image - DONE
-//      Connect webpage to webbserver
-//      Create connection to database
-//      Create connection to image processing module
+//      Make base64 a JSON file - Prob DONE
+//      Connect webpage to webbserver - Hampus
+//      Create connection to database - Esbjörn
+//      Create connection to image processing module - Esbjörn
 //      Separate into different files, cleanup
 
 async function downloadImage(imageSrc, nameOfDownload = 'my-image.jpeg') {
@@ -34,6 +35,8 @@ async function downloadImage(imageSrc, nameOfDownload = 'my-image.jpeg') {
 
 var image = null
 var url64 = null
+
+let buttons = document.getElementsByClassName("procButtons");
 
 //Creates a canvas, converts to dataUrl then converted to base64
 function toDataURL(src, outputformat) {
@@ -69,10 +72,16 @@ async function reqThreshold() {
     url64 = dataURL
   })
 
-  //to test that image is converted
-  console.log(url64)
+  //Create a JSON object of the url
+  let splitUrl = url64.slice(url64.indexOf(";") + 1)
+  const jsonStr = "{ " + '"body" : "' + splitUrl + '" }'
+  const jsonObj = JSON.parse(jsonStr)
 
-  downloadImage(url64, 'threshold.jpeg')
+  //to test that image is converted
+  //console.log(url64)
+  console.log(jsonObj)
+
+  //downloadImage(url64, 'threshold.jpeg')
 
 
   //get secure url from server
@@ -85,13 +94,18 @@ async function reqThreshold() {
 async function reqBlur() {
   console.log("Blurring")
 
-  //Converts the uploaded image into base64
+    //Converts the uploaded image into base64
   image = document.getElementById("image");
   await toDataURL(image.src, 'image/JPEG')
   .then(function(dataURL) {
     // Handle the data URL here
     url64 = dataURL
   })
+
+  //Create a JSON object of the url
+  let splitUrl = url64.slice(url64.indexOf(";") + 1)
+  const jsonStr = "{ " + '"body" : "' + splitUrl + '" }'
+  const jsonObj = JSON.parse(jsonStr)
 
   //to test that image is converted
   console.log(url64)
@@ -128,8 +142,8 @@ function App() {
         <br />
         <br />
         <div className='procButtons'>
-          <button onClick={reqThreshold}>Threshold</button>
-          <button onClick={reqBlur}>Blur</button>
+          <button id='threshBtn' onClick={reqThreshold}>Threshold</button>
+          <button id='blurBtn' onClick={reqBlur}>Blur</button>
         </div>
         <label className="custom-file-upload">
           <p>Upload image</p>
@@ -141,6 +155,14 @@ function App() {
               image = event.target.files[0];
               console.log(event.target.files[0]);
               setSelectedImage(event.target.files[0]);
+              if(event.target.files[0] == null){
+                document.getElementById("threshBtn").style.visibility="hidden"
+                document.getElementById("blurBtn").style.visibility="hidden"
+              }
+              else{
+                document.getElementById("threshBtn").style.visibility="visible"
+                document.getElementById("blurBtn").style.visibility="visible"
+              }
             }}
           />
         </label>
@@ -148,14 +170,14 @@ function App() {
       
       <div className='imageDatabase'>
         <h1 id='galleryDesc'>Last images processed</h1>
-        <img className='galleryImg' id='tmp' src={img1}></img>
-        <img className='galleryImg' src={img2}></img>
-        <img className='galleryImg' src={img1}></img>
-        <img className='galleryImg' src={img2}></img>
-        <img className='galleryImg' src={img1}></img>
-        <img className='galleryImg' src={img1}></img>
-        <img className='galleryImg' src={img2}></img>
-        <img className='galleryImg' src={img1}></img>
+        <img className='galleryImg' id='img1' src="https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"></img>
+        <img className='galleryImg' id='img2' src={img2}></img>
+        <img className='galleryImg' id='img3' src={img1}></img>
+        <img className='galleryImg' id='img4' src={img2}></img>
+        <img className='galleryImg' id='img5' src={img1}></img>
+        <img className='galleryImg' id='img6' src={img1}></img>
+        <img className='galleryImg' id='img7' src={img2}></img>
+        <img className='galleryImg' id='img8' src={img1}></img>
       </div>
     </div>
   );

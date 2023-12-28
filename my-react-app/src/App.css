@@ -62,12 +62,16 @@
   width: 100%;
 }
 
-input[type="file"] {
-  display: none;
+#threshBtn{
+  visibility: hidden;
 }
 
-.procButtons{
-  visibility:visible;
+#blurBtn{
+  visibility: hidden;
+}
+
+input[type="file"] {
+  display: none;
 }
 
 .custom-file-upload {background-color:#282c34; /* Green */

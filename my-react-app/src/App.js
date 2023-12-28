@@ -13,9 +13,14 @@ import {decode as base64_decode, encode as base64_encode} from 'base-64';
 //      Create connection to database - Esbjörn
 //      Create connection to image processing module - Esbjörn
 //      Separate into different files, cleanup
+//      Create code for the gallery
+//      fix Download
 
-async function downloadImage(imageSrc, nameOfDownload = 'my-image.jpeg') {
-  const response = await fetch(imageSrc);
+async function downloadImage(nameOfDownload = 'processed.png') {
+  window.open(image.src, "_blank");
+
+  //Used to download local files, not needed for current implementation
+  /*const response = await fetch(imageSrc);
 
   const blobImage = await response.blob();
 
@@ -29,14 +34,15 @@ async function downloadImage(imageSrc, nameOfDownload = 'my-image.jpeg') {
   anchorElement.click();
 
   document.body.removeChild(anchorElement);
-  window.URL.revokeObjectURL(href);
+  window.URL.revokeObjectURL(href);*/
 }
 
 
 var image = null
 var url64 = null
-
-let buttons = document.getElementsByClassName("procButtons");
+var downloadBtn = null;
+var blurBtn = null;
+var threshBtn = null;
 
 //Creates a canvas, converts to dataUrl then converted to base64
 function toDataURL(src, outputformat) {
@@ -62,8 +68,6 @@ function toDataURL(src, outputformat) {
 }
 
 async function reqThreshold() {
-  console.log("thresholding")
-
   //Converts the uploaded image into base64
   image = document.getElementById("image");
   await toDataURL(image.src, 'image/JPEG')
@@ -78,10 +82,7 @@ async function reqThreshold() {
   const jsonObj = JSON.parse(jsonStr)
 
   //to test that image is converted
-  //console.log(url64)
   console.log(jsonObj)
-
-  //downloadImage(url64, 'threshold.jpeg')
 
 
   //get secure url from server
@@ -89,12 +90,17 @@ async function reqThreshold() {
   //POST image directly to s3 bucket
 
   //POST request to server to store any extra data
+
+  //Get response when image is done
+  image.src = "https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"
+
+  //show download button
+  downloadBtn.style.visibility = "visible"
+  downloadBtn.style.position = "relative"
 }
 
 async function reqBlur() {
-  console.log("Blurring")
-
-    //Converts the uploaded image into base64
+  //Converts the uploaded image into base64
   image = document.getElementById("image");
   await toDataURL(image.src, 'image/JPEG')
   .then(function(dataURL) {
@@ -108,13 +114,22 @@ async function reqBlur() {
   const jsonObj = JSON.parse(jsonStr)
 
   //to test that image is converted
-  console.log(url64)
   
   //get secure url from server
 
   //POST image directly to s3 bucket
 
   //POST request to server to store any extra data
+
+
+  //Get response when image is done
+  
+  //Placeholder to change image
+  image.src = "https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"
+
+  //show download button
+  downloadBtn.style.visibility = "visible"
+  downloadBtn.style.position = "relative"
 }
 
 function App() {
@@ -144,6 +159,7 @@ function App() {
         <div className='procButtons'>
           <button id='threshBtn' onClick={reqThreshold}>Threshold</button>
           <button id='blurBtn' onClick={reqBlur}>Blur</button>
+          <button id='downloadBtn' onClick={downloadImage}>Download</button>
         </div>
         <label className="custom-file-upload">
           <p>Upload image</p>
@@ -152,17 +168,31 @@ function App() {
             type="file"
             name="myImage"
             onChange={(event) => {
+              //Get buttons from document/website
+              downloadBtn = document.getElementById("downloadBtn")
+              blurBtn = document.getElementById("blurBtn")
+              threshBtn = document.getElementById("threshBtn")
+              
+              //Get uploaded image
               image = event.target.files[0];
-              console.log(event.target.files[0]);
+              //console.log(event.target.files[0]);
               setSelectedImage(event.target.files[0]);
+
+              //Hide buttons when necessary
               if(event.target.files[0] == null){
-                document.getElementById("threshBtn").style.visibility="hidden"
-                document.getElementById("blurBtn").style.visibility="hidden"
+                threshBtn.style.visibility="hidden"
+                threshBtn.style.position="absolute"
+                blurBtn.style.visibility="hidden"
+                blurBtn.style.position="absolute"
               }
               else{
-                document.getElementById("threshBtn").style.visibility="visible"
-                document.getElementById("blurBtn").style.visibility="visible"
+                threshBtn.style.visibility="visible"
+                threshBtn.style.position="relative"
+                blurBtn.style.visibility="visible"
+                blurBtn.style.position="relative"
               }
+              downloadBtn.style.visibility = "hidden"
+              downloadBtn.style.position = "absolute"
             }}
           />
         </label>

@@ -7,10 +7,30 @@ import React, { Component, useState } from "react";
 import {decode as base64_decode, encode as base64_encode} from 'base-64';
 
 //TODO  Base64 -> Image
-//      Download image
+//      Download image - DONE
 //      Connect webpage to webbserver
 //      Create connection to database
 //      Create connection to image processing module
+//      Separate into different files, cleanup
+
+async function downloadImage(imageSrc, nameOfDownload = 'my-image.jpeg') {
+  const response = await fetch(imageSrc);
+
+  const blobImage = await response.blob();
+
+  const href = URL.createObjectURL(blobImage);
+
+  const anchorElement = document.createElement('a');
+  anchorElement.href = href;
+  anchorElement.download = nameOfDownload;
+
+  document.body.appendChild(anchorElement);
+  anchorElement.click();
+
+  document.body.removeChild(anchorElement);
+  window.URL.revokeObjectURL(href);
+}
+
 
 var image = null
 var url64 = null
@@ -52,6 +72,9 @@ async function reqThreshold() {
   //to test that image is converted
   console.log(url64)
 
+  downloadImage(url64, 'threshold.jpeg')
+
+
   //get secure url from server
 
   //POST image directly to s3 bucket
@@ -59,9 +82,19 @@ async function reqThreshold() {
   //POST request to server to store any extra data
 }
 
-function reqBlur() {
+async function reqBlur() {
   console.log("Blurring")
-  console.log(image)
+
+  //Converts the uploaded image into base64
+  image = document.getElementById("image");
+  await toDataURL(image.src, 'image/JPEG')
+  .then(function(dataURL) {
+    // Handle the data URL here
+    url64 = dataURL
+  })
+
+  //to test that image is converted
+  console.log(url64)
   
   //get secure url from server
 

@@ -1,20 +1,8 @@
-import logo from './logo.svg';
 import upload from './upload.svg';
-import img1 from './img1.jpg';
-import img2 from './img2.png'
+import loadingImg from './loading.webp';
 import './App.css';
-import React, { Component, useState } from "react";
-import {decode as base64_decode, encode as base64_encode} from 'base-64';
-
-//TODO  Base64 -> Image
-//      Download image - DONE
-//      Make base64 a JSON file - Prob DONE
-//      Connect webpage to webbserver - Hampus
-//      Create connection to database - Esbjörn
-//      Create connection to image processing module - Esbjörn
-//      Separate into different files, cleanup
-//      Create code for the gallery
-//      fix Download
+import React, { Component, useState, useEffect } from "react";
+const { XMLParser} = require("fast-xml-parser");
 
 async function downloadImage(nameOfDownload = 'processed.png') {
   window.open(image.src, "_blank");
@@ -38,11 +26,9 @@ async function downloadImage(nameOfDownload = 'processed.png') {
 }
 
 
-var image = null
-var url64 = null
-var downloadBtn = null;
+var image = null;
 var blurBtn = null;
-var threshBtn = null;
+var contourBtn = null;
 
 //Creates a canvas, converts to dataUrl then converted to base64
 function toDataURL(src, outputformat) {
@@ -67,79 +53,108 @@ function toDataURL(src, outputformat) {
   });
 }
 
-async function reqThreshold() {
-  //Converts the uploaded image into base64
-  image = document.getElementById("image");
-  await toDataURL(image.src, 'image/JPEG')
-  .then(function(dataURL) {
-    // Handle the data URL here
-    url64 = dataURL
-  })
+const s3link = process.env.REACT_APP_S3_API_LINK;
+const apiLink = process.env.REACT_APP_API_GATEWAY_LINK;
+async function getImagesList() {
+  return await fetch(apiLink + "/Test/listimages");
+};
 
-  //Create a JSON object of the url
-  let splitUrl = url64.slice(url64.indexOf(",") + 1)
-  const jsonStr = "{ " + '"body" : "' + splitUrl + '" }'
-  const jsonObj = JSON.parse(jsonStr)
+async function uploadImage(url64, editType) {
+  let base64 = url64.slice(url64.indexOf(";") + 1).substr(7);
+  const jsonStr = "{ " + '"body" : "' + base64 + '", "editType": "' + editType + '" }';
+  const response = await fetch(apiLink + "/Test/editAndUpload", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: jsonStr
+  });
+  return response.json();
+};
 
-  //to test that image is converted
-  //console.log(url64)
-  console.log(jsonObj)
+function showProcButtons() {
+  blurBtn = document.getElementById("blurBtn");
+  contourBtn = document.getElementById("contourBtn");
+  contourBtn.style.visibility="visible";
+  contourBtn.style.position="relative";
+  blurBtn.style.visibility="visible";
+  blurBtn.style.position="relative";
+};
 
-
-  //get secure url from server
-
-  //POST image directly to s3 bucket
-
-  //POST request to server to store any extra data
-
-  //Get response when image is done
-  image.src = "https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"
-
-  //show download button
-  downloadBtn.style.visibility = "visible"
-  downloadBtn.style.position = "relative"
-}
-
-async function reqBlur() {
-  //Converts the uploaded image into base64
-  image = document.getElementById("image");
-  await toDataURL(image.src, 'image/JPEG')
-  .then(function(dataURL) {
-    // Handle the data URL here
-    url64 = dataURL
-  })
-
-  //Create a JSON object of the url
-  let splitUrl = url64.slice(url64.indexOf(";") + 1)
-  const jsonStr = "{ " + '"body" : "' + splitUrl + '" }'
-  const jsonObj = JSON.parse(jsonStr)
-
-  //to test that image is converted
-  
-  //get secure url from server
-
-  //POST image directly to s3 bucket
-
-  //POST request to server to store any extra data
-
-
-  //Get response when image is done
-
-  //Placeholder to change image
-  image.src = "https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"
-
-  //show download button
-  downloadBtn.style.visibility = "visible"
-  downloadBtn.style.position = "relative"
-}
+function hideProcButtons() {
+  blurBtn = document.getElementById("blurBtn");
+  contourBtn = document.getElementById("contourBtn");
+  contourBtn.style.visibility="hidden";
+  contourBtn.style.position="absolute";
+  blurBtn.style.visibility="hidden";
+  blurBtn.style.position="absolute";
+};
 
 function App() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [sideImages, setSideImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
+  useEffect(() => {
+    getImagesList().then(response => {
+      if (response.ok) {
+        let XML = ""
+        response.text().then(result => {
+          XML = result
+          const parser = new XMLParser();
+          let json = parser.parse(XML);
+          let newImageLinks = [];
+          if (json["ListBucketResult"]["Contents"] != null) {
+              const s3objects = json["ListBucketResult"]["Contents"];
+              if (Array.isArray(s3objects)) {
+                  for (var i = 0; i < s3objects.length; i++) {
+                    newImageLinks.push(s3link + s3objects[i]["Key"]);
+                  }
+              } else {
+                newImageLinks.push(s3link + s3objects["Key"]);
+              }
+              setSideImages(newImageLinks);
+          }
+        });
+      }
+    })
+  }, [sideImages]); 
+
+  async function reqBlur() {
+    await reqUpload('blur');
+  };
+  async function reqContour() {
+    await reqUpload('contour');
+  };
+
+  //uploads image and edits with the specific editType. if successful, adds blurred image to sideImages
+  async function reqUpload(editType) {
+    image = document.getElementById("image");
+    let url64 = ""
+    await toDataURL(image.src, 'image/JPEG')
+    .then(function(dataURL) {
+      url64 = dataURL;
+    })
+    setIsUploading(true);
+    uploadImage(url64, editType).then((response) => {
+      if (Object.hasOwn(response, 'statusCode')) {
+        if (response['statusCode'] === 200) {
+          let tempSideImages = [...sideImages];
+          tempSideImages.push(response['url']);
+          setSideImages(tempSideImages);
+          setIsUploading(false);
+          setUploadStatus("Upload successful!");
+          setSelectedImage(null);
+          hideProcButtons();
+          return;
+        }
+      }
+      setUploadStatus("Upload failed!");
+    });
+  }
+
   return (
     <div className="App">
-      <div className='App-header'>
-        <img src={logo} alt='Magic logo' id='logo'></img>
-      </div>
       <div className='main'>
         {selectedImage && (
           <div>
@@ -148,7 +163,9 @@ function App() {
                 id='image'
                 alt="not found"
                 src={URL.createObjectURL(selectedImage)}
-              />
+              />{
+                isUploading ? (<img id="loadingImg" src={loadingImg} width="350" height="350"/>) : <></>
+              }
             </div>
             <br />
             
@@ -158,10 +175,10 @@ function App() {
         <br />
         <br />
         <div className='procButtons'>
-          <button id='threshBtn' onClick={reqThreshold}>Threshold</button>
+          <button id='contourBtn' onClick={reqContour}>Contour</button>
           <button id='blurBtn' onClick={reqBlur}>Blur</button>
-          <button id='downloadBtn' onClick={downloadImage}>Download</button>
         </div>
+        <h1>{uploadStatus}</h1>
         <label className="custom-file-upload">
           <p>Upload image</p>
           <img src={upload} id='uploadIMG'></img>
@@ -169,46 +186,24 @@ function App() {
             type="file"
             name="myImage"
             onChange={(event) => {
-              //Get buttons from document/website
-              downloadBtn = document.getElementById("downloadBtn")
-              blurBtn = document.getElementById("blurBtn")
-              threshBtn = document.getElementById("threshBtn")
-              
-              //Get uploaded image
               image = event.target.files[0];
-              //console.log(event.target.files[0]);
               setSelectedImage(event.target.files[0]);
-
-              //Hide buttons when necessary
               if(event.target.files[0] == null){
-                threshBtn.style.visibility="hidden"
-                threshBtn.style.position="absolute"
-                blurBtn.style.visibility="hidden"
-                blurBtn.style.position="absolute"
+                hideProcButtons();
               }
               else{
-                threshBtn.style.visibility="visible"
-                threshBtn.style.position="relative"
-                blurBtn.style.visibility="visible"
-                blurBtn.style.position="relative"
+                showProcButtons();
               }
-              downloadBtn.style.visibility = "hidden"
-              downloadBtn.style.position = "absolute"
             }}
           />
         </label>
       </div>
       
       <div className='imageDatabase'>
-        <h1 id='galleryDesc'>Last images processed</h1>
-        <img className='galleryImg' id='img1' src="https://images-dv1566.s3.amazonaws.com/829621ba-a233-4e66-8890-30678c6e9f81.png"></img>
-        <img className='galleryImg' id='img2' src={img2}></img>
-        <img className='galleryImg' id='img3' src={img1}></img>
-        <img className='galleryImg' id='img4' src={img2}></img>
-        <img className='galleryImg' id='img5' src={img1}></img>
-        <img className='galleryImg' id='img6' src={img1}></img>
-        <img className='galleryImg' id='img7' src={img2}></img>
-        <img className='galleryImg' id='img8' src={img1}></img>
+        <h1 id='galleryDesc'>Gallery:</h1>
+         {sideImages.map((item, index) => (
+        <img className='galleryImg' src={item} key={index} id={'img' + item}></img>
+      ))}
       </div>
     </div>
   );

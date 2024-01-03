@@ -126,6 +126,9 @@ function App() {
   async function reqContour() {
     await reqUpload('contour');
   };
+  async function reqSharpen() {
+    await reqUpload('sharpen');
+  };
 
   //uploads image and edits with the specific editType. if successful, adds blurred image to sideImages
   async function reqUpload(editType) {
@@ -177,6 +180,7 @@ function App() {
         <div className='procButtons'>
           <button id='contourBtn' onClick={reqContour}>Contour</button>
           <button id='blurBtn' onClick={reqBlur}>Blur</button>
+          <button id='blurBtn' onClick={reqSharpen}>Sharpen</button>
         </div>
         <h1>{uploadStatus}</h1>
         <label className="custom-file-upload">

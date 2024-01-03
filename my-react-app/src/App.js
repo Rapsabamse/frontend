@@ -143,7 +143,7 @@ function App() {
       if (Object.hasOwn(response, 'statusCode')) {
         if (response['statusCode'] === 200) {
           let tempSideImages = [...sideImages];
-          tempSideImages.push(response['url']);
+          tempSideImages.unshift(response['url']);
           setSideImages(tempSideImages);
           setIsUploading(false);
           setUploadStatus("Upload successful!");
@@ -202,12 +202,15 @@ function App() {
           />
         </label>
       </div>
-      
-      <div className='imageDatabase'>
-        <h1 id='galleryDesc'>Gallery:</h1>
-         {sideImages.map((item, index) => (
-        <img className='galleryImg' src={item} key={index} id={'img' + item}></img>
-      ))}
+      <div style={{display: 'flex', flexDirection: 'column'}}>
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+          <h1 id='galleryDesc'>Gallery</h1>
+        </div>
+        <div className='imageDatabase'>
+          {sideImages.map((item, index) => (
+          <img className='galleryImg' src={item} key={index} id={'img' + item}></img>
+        ))}
+        </div>
       </div>
     </div>
   );

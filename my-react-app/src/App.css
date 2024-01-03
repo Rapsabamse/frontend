@@ -1,5 +1,10 @@
 .App {
   text-align: left;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow-y: scroll;
+  background-color: rgb(155, 155, 155);
 }
 
 .App-header {
@@ -16,20 +21,20 @@
   color: #61dafb;
 }
 
-.main{
-  width: 70vw;
-  height: 90vh;
-  max-height: 90vh;
+.main {
+  min-width: 50vw;
+  max-width: 50vw;
+  height: 100%;
+  max-height: 100%;
   text-align: center;
 
   /* Used to put imageDatabase on same row */
   float: left;
 
-  margin-top: 8px;
   margin-left: 8px;
 }
 
-.imageInput{
+.imageInput {
   /* placeholder */
   width: 100%;
   max-height: 60%;
@@ -38,36 +43,37 @@
   border-radius: 15px;*/
 }
 
-.imageDatabase{
-  display: inline block;
-  width: 20vw;
-  height: 90vh;
-  
+.imageDatabase {
+  padding: 20px;
+  min-width: 50vw;
+  max-width: 50vw;
+  height: 100%;
+
   /*border: 3px solid #282c34;*/
   border-radius: 15px 0px 0px 15px;
 
-  margin-top: 8px;
-  margin-left: 75vw;
+
 
   overflow-y: auto;
 
   text-align: center;
 }
 
-#galleryDesc{
-
+#galleryDesc {
+  font-size: 60px;
+  margin: 10px;
 }
 
-.galleryImg{
-  width: 100%;
+.galleryImg {
+  width: 50%;
 }
 
-#contourBtn{
+#contourBtn {
   visibility: hidden;
   position: absolute;
 }
 
-#blurBtn{
+#blurBtn {
   visibility: hidden;
   position: absolute;
 }
@@ -76,7 +82,9 @@ input[type="file"] {
   display: none;
 }
 
-.custom-file-upload {background-color:#282c34; /* Green */
+.custom-file-upload {
+  background-color: #282c34;
+  /* Green */
   border-radius: 12px;
   border: none;
   color: white;
@@ -92,7 +100,8 @@ input[type="file"] {
 }
 
 button {
-  background-color:#282c34; /* Green */
+  background-color: #282c34;
+  /* Green */
   border-radius: 12px;
   min-width: 5vw;
   border: none;
@@ -105,7 +114,7 @@ button {
   font-size: 16px;
 }
 
-#logo{
+#logo {
   filter: invert(98%) sepia(1%) saturate(208%) hue-rotate(184deg) brightness(116%) contrast(100%);
   left: 8px;
   top: 8px;
@@ -113,19 +122,18 @@ button {
   display: block;
 }
 
-#uploadIMG{
+#uploadIMG {
   filter: invert(98%) sepia(1%) saturate(208%) hue-rotate(184deg) brightness(116%) contrast(100%);
   max-height: 3vh;
 }
 
-#id{
+#id {
   left: 80px;
 }
 
-#image{
-  min-height: 50vh;
-  max-height: 59vh; /*60 - 1*/
-  max-width: 100vw;
+#image {
+  height: auto;
+  width: 30%;
   margin-top: 1vh;
 }
 

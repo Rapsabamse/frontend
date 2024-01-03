@@ -65,7 +65,8 @@
 }
 
 .galleryImg {
-  width: 50%;
+  width: 25vw;
+  height: 25vw;
 }
 
 #contourBtn {
